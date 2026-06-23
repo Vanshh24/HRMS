@@ -3,7 +3,7 @@ import Employees from "./component/admin/pages/Employees";
 import LeaveRequest from "./component/admin/pages/LeaveRequest";
 import Panel from "./component/admin/Panel";
 import Login from "./component/loginPage/Login";
-import SignUp from "./component/signupPage/Signup";
+import SignUp from "./component/signupPage/SignUp";
 import Attendence from "./component/admin/pages/Attendence";
 import Payroll from "./component/admin/pages/Payroll";
 import Performance from "./component/admin/pages/Performance";
