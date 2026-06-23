@@ -82,7 +82,7 @@ function SignUp() {
               <button
                 type="button"
                 className="w-full bg-blue-500 text-white h-8 rounded-md"
-                onClick={handleClick}
+                // onClick={handleClick}
               >
                 Sign Up
               </button>
