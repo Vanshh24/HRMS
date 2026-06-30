@@ -1,4 +1,4 @@
-import Dashboard from "./component/admin/Dashboard"
+import Dashboard from "./component/admin/Dashboard";
 import Employees from "./component/admin/pages/Employees";
 import LeaveRequest from "./component/admin/pages/LeaveRequest";
 import Panel from "./component/admin/Panel";
@@ -9,6 +9,7 @@ import Payroll from "./component/admin/pages/Payroll";
 import Performance from "./component/admin/pages/Performance";
 import Reports from "./component/admin/pages/Reports";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import RequireAuth from "./component/RequireAuth";
 
 function App() {
   return (
@@ -17,6 +18,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <Panel />
+              </RequireAuth>
+            }
+          />
           <Route path="/admin" element={<Panel />}>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />

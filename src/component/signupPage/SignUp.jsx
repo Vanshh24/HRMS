@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 function SignUp() {
+  let navigate = useNavigate();
   let [signupData, setSignupData] = useState({});
   let [error, setError] = useState({});
   let handleChange = (e) => {
@@ -20,6 +22,25 @@ function SignUp() {
       formError.confirmPassword = "Confirm password is required.";
     } else {
       console.log("Api data", signupData);
+      navigate("/admin");
+      axios
+        .post("http://localhost:5000/api/signup", signupData)
+        .then((res) => {
+          let { success, message, token } = res.data;
+          if (success) {
+            alert(message);
+            localStorage.setItem("auth_token", token);
+            navigate("/admin");
+          }
+        })
+        .catch((err) => {
+          let { success, message } = err.response;
+
+          if (success === false) {
+            alert(message);
+          }
+          console.log(err.response.data);
+        });
     }
     setError(formError);
   };
@@ -30,6 +51,7 @@ function SignUp() {
 
   return (
     <div className="grid grid-cols-3 gap-4">
+      <div className="..."></div>
       <div className="...">
         <div className="card w-100 h-170 border border-black-200 m-auto rounded-md shadow-md/50">
           <h1 className="card-header text-center font-bold text-xl">Sign Up</h1>

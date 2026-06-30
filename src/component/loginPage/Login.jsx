@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -8,8 +9,8 @@ function Login() {
     let { name, value } = e.target;
     setLoginData({ ...loginData, [name]: value });
   };
-  let formError = {};
   let navigate = useNavigate();
+  let formError = {};
   let handleValidate = (loginData) => {
     if (!loginData.email) {
       formError.email = "Email is required.";
@@ -18,7 +19,22 @@ function Login() {
     } else if (!loginData.confirmPassword) {
       formError.confirmPassword = "Confirm password is required.";
     } else {
-      navigate("/admin");
+      axios
+        .post("http://localhost:5000/api/login", loginData)
+        .then((response) => {
+          let { success, message, token } = response.data;
+          if (success) {
+            alert(message);
+            localStorage.setItem("auth_token: ", token);
+            navigate("/admin");
+          }
+        })
+        .catch((err) => {
+          let { success, message } = err.response.data;
+          if (!success) {
+            alert(message);
+          }
+        });
     }
     setError(formError);
   };
@@ -28,7 +44,6 @@ function Login() {
   };
 
   console.log(error.email);
-
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="..."></div>

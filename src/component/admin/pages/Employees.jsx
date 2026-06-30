@@ -1,20 +1,12 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Card,
   CardAction,
@@ -24,305 +16,256 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useState } from "react";
 
 export default function Employees() {
-  let [empData, setEmpData] = useState({});
-  let [empFormData, setEmpFormData] = useState({});
-  let handleChange = (e) => {
-    let { name, value } = e.target;
-    setEmpFormData({ ...empFormData, [name]: value });
-    console.log(empData);
+  const [employees, setEmployees] = useState([]);
+  const [formData, setFormData] = useState({});
+  const [openModal, setOpenModal] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+  const [formError, setFormError] = useState({});
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/employee_route/api/get/employees")
+      .then((res) => {
+        let { success, message, data } = res.data;
+        setEmployees(data);
+      })
+      .catch((err) => {
+        console.log(err.response.data);
+      });
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
-  let handleSubmit = () => {};
-  let [openModal, setOpenModal] = useState(false);
-  let [openEditModal, setOpenEditModal] = useState(false);
-  let handleClick = () => {
-    setEmpFormData(empFormData);
-    setOpenModal(false);
+  const handleValidate = () => {
+    const formError = {};
+
+    if (!formData.empid) formError.empid = "Employee ID is required";
+    if (!formData.empname) formError.empname = "Employee Name is required";
+    if (!formData.email) formError.email = "Email is required";
+    if (!formData.phone) formError.phone = "Phone Number is required";
+    if (!formData.address) formError.address = "Address is required";
+
+    if (!formData.date_of_birth)
+      formError.date_of_birth = "Date of Birth is required";
+
+    if (!formData.date_of_join)
+      formError.date_of_join = "Joining Date is required";
+
+    if (!formData.department) formError.department = "Department is required";
+
+    if (!formData.designation)
+      formError.designation = "Designation is required";
+
+    setFormError(formError);
+
+    return Object.keys(formError).length === 0;
   };
-  let handleEditClick = () => {
-    setEmpFormData(empData);
-    setOpenEditModal(false);
+
+  const submitEmployee = async () => {
+    if (!handleValidate()) return;
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/employee_route/api/post/employee",
+        formData,
+      );
+
+      console.log("Full response:", res.data);
+
+      if (res.data.success) {
+        alert("User Data saved");
+
+        if (editIndex !== null) {
+          const updatedEmployees = [...employees];
+          updatedEmployees[editIndex] = formData;
+          setEmployees(updatedEmployees);
+          setEditIndex(null);
+        } else {
+          setEmployees([...employees, formData]);
+        }
+
+        setFormData({});
+        setFormError({});
+        setOpenModal(false);
+      }
+    } catch (err) {
+      console.log(err.response?.data || err);
+      alert(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
+  const deleteEmployee = (index) => {
+    setEmployees(employees.filter((_, i) => i !== index));
+  };
+
+  const editEmployee = (index) => {
+    setFormData(employees[index]);
+    setEditIndex(index);
+    setOpenModal(true);
   };
 
   return (
-    <div>
-      <Dialog open={openModal} onOpenChange={() => setOpenModal(true)}>
-        <div className="text-right">
-          <DialogContent className="scrollbar-auto">
-            <DialogHeader>
-              <DialogTitle>Employee Form</DialogTitle>
-              <DialogDescription>
-                <label className="font-bold">Emp id</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="text"
-                  placeholder="Enter the Employee ID"
-                  name="id"
-                  defaultValue={empFormData.id}
-                  onChange={handleChange}
-                />
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Employee Management</CardTitle>
+          <CardDescription>Add and manage employees</CardDescription>
 
-                <label className="font-bold mb-5">Name</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="text"
-                  placeholder="Enter the Employee name"
-                  name="name"
-                  defaultValue={empFormData.name}
-                  onChange={handleChange}
-                />
+          <CardAction>
+            <button
+              onClick={() => setOpenModal(true)}
+              className="h-10 w-40 rounded-xl bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
+            >
+              Add Employee
+            </button>
+          </CardAction>
+        </CardHeader>
 
-                <label className="font-bold mb-5">Email</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="email"
-                  placeholder="Enter the Employee email"
-                  name="email"
-                  defaultValue={empFormData.email}
-                  onChange={handleChange}
-                />
+        <CardContent>
+          <table className="border-collapse border border-gray-400 w-full">
+            <thead>
+              <tr>
+                <th className="border border-gray-300 p-2">Emp Id</th>
+                <th className="border border-gray-300 p-2">Name</th>
+                <th className="border border-gray-300 p-2">Email</th>
+                <th className="border border-gray-300 p-2">Phone</th>
+                <th className="border border-gray-300 p-2">Address</th>
+                <th className="border border-gray-300 p-2">DOB</th>
+                <th className="border border-gray-300 p-2">Joining Date</th>
+                <th className="border border-gray-300 p-2">Designation</th>
+                <th className="border border-gray-300 p-2">Department</th>
+                <th className="border border-gray-300 p-2">Action</th>
+              </tr>
+            </thead>
 
-                <label className="font-bold mb-5">Phone no.</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="tel"
-                  placeholder="Enter the phone no."
-                  name="phone"
-                  defaultValue={empFormData.phone}
-                  onChange={handleChange}
-                />
-                <label className="font-bold mb-5">Emp Address</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="text"
-                  placeholder="Enter the Employee address"
-                  name="address"
-                  defaultValue={empFormData.address}
-                  onChange={handleChange}
-                />
+            <tbody>
+              {employees.map((emp, index) => (
+                <tr key={index}>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeID}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeName}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeEmail}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeePhone}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeAddress}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeDOB}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeDOJ}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeDesignation}
+                  </td>
+                  <td className="border border-gray-300 p-2">
+                    {emp.employeeDesignation}
+                  </td>
+                  <td className="border border-gray-300 p-2 flex gap-2">
+                    <button
+                      onClick={() => {
+                        editEmployee(index);
+                      }}
+                      className="bg-blue-600 text-white px-3 py-1 rounded"
+                    >
+                      Edit
+                    </button>
 
-                <label className="font-bold mb-5">Date of birth</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="date"
-                  placeholder="Enter the date of birth"
-                  name="dob"
-                  defaultValue={empFormData.dob}
-                  onChange={handleChange}
-                />
+                    <button
+                      onClick={() => deleteEmployee(index)}
+                      className="bg-red-600 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </CardContent>
 
-                <label className="font-bold mb-5">Joining Date</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="date"
-                  placeholder="Enter the Employee joining date"
-                  name="joiningDate"
-                  defaultValue={empFormData.doj}
-                  onChange={handleChange}
-                />
-                <label className="font-bold mb-5">Emp Department</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="text"
-                  placeholder="Enter the Employee emp department"
-                  name="department"
-                  defaultValue={empFormData.department}
-                  onChange={handleChange}
-                />
+        <CardFooter>Employee List</CardFooter>
+      </Card>
 
-                <label className="font-bold mb-5">Designation</label>
-                <input
-                  className="w-full h-8 border-2 border-black rounded"
-                  type="text"
-                  placeholder="Enter the Employee email"
-                  name="designation"
-                  defaultValue={empFormData.designation}
-                  onChange={handleChange}
-                />
-                <div>
-                  <button
-                    className="text-white bg-red-500 rounded-3xl p-3 m-3"
-                    onClick={() => {
-                      setOpenModal(false);
-                    }}
-                  >
-                    close
-                  </button>
-                  <button
-                    className="text-white bg-blue-600 rounded-3xl p-3"
-                    onClick={handleClick}
-                  >
-                    submit
-                  </button>
-                </div>
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Employees</CardTitle>
-            <CardDescription>Card Description</CardDescription>
-            <CardAction>
-              <DialogTrigger className="h-13 w-50 border-2 text-white bg-blue-600 rounded-2xl">
-                Add Employee
-              </DialogTrigger>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <p>
-              {/* Table component */}
-              <Table>
-                <TableCaption>A list of your recent invoices.</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Emp ID</TableHead>
-                    <TableHead>Employee Name</TableHead>
-                    <TableHead>Employee E-mail</TableHead>
-                    <TableHead>Employee Address</TableHead>
-                    <TableHead>Phone no.</TableHead>
-                    <TableHead>DOB</TableHead>
-                    <TableHead>Date of Joining</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">{empData.id}</TableCell>
-                    <TableCell>{empData.name}</TableCell>
-                    <TableCell>{empData.email}</TableCell>
-                    <TableCell>{empData.address}</TableCell>
-                    <TableCell>{empData.phone}</TableCell>
-                    <TableCell>{empData.dob}</TableCell>
-                    <TableCell>{empData.doj}</TableCell>
-                    <TableCell>{empData.department}</TableCell>
-                    <TableCell>
-                      <DialogTrigger className="h-13 w-25 border-2 text-white bg-blue-600 rounded-2xl">
-                        Edit
-                      </DialogTrigger>
-                      <button>Delete</button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </p>
-          </CardContent>
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent className="h-150 overflow-y-scroll">
+          <DialogHeader>
+            <DialogTitle>Employee Form</DialogTitle>
 
-          {/* eidt employee record modal */}
-          <div className="text-right">
-            <Dialog open={openEditModal}>
-              <DialogContent className="scrollbar-auto">
-                <DialogHeader>
-                  <DialogTitle>Edit Employee Form</DialogTitle>
-                  <DialogDescription>
-                    <label className="font-bold">Emp id</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="text"
-                      placeholder="Enter the Employee ID"
-                      name="id"
-                      onChange={handleChange}
-                    />
+            <DialogDescription>employee form</DialogDescription>
+            {[
+              ["empid", "Employee Id"],
+              ["empname", "Name"],
+              ["email", "Email"],
+              ["phone", "Phone"],
+              ["address", "Address"],
+              ["date_of_birth", "Date of Birth"],
+              ["date_of_join", "Joining Date"],
+              ["department", "Department"],
+              ["designation", "Designation"],
+            ].map(([name, label]) => (
+              <div key={name} className="mb-3">
+                <label className="block text-amber-700 text-xl text-center">
+                  {label}
+                </label>
 
-                    <label className="font-bold mb-5">Name</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="text"
-                      placeholder="Enter the Employee name"
-                      name="name"
-                      onChange={handleChange}
-                    />
+                {["date_of_birth", "date_of_join"].includes(name) ? (
+                  <input
+                    type="date"
+                    name={name}
+                    value={formData[name] || ""}
+                    onChange={handleChange}
+                    className="w-full border-2 text-center rounded-2xl p-2"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    name={name}
+                    value={formData[name] || ""}
+                    onChange={handleChange}
+                    placeholder={`Enter Employee ${label}`}
+                    className="w-full border-2 text-center rounded-2xl p-2"
+                  />
+                )}
+                {/* Error Message */}
+                {formError?.[name] && (
+                  <p className="text-red-500 text-sm mt-1">{formError[name]}</p>
+                )}
+              </div>
+            ))}
 
-                    <label className="font-bold mb-5">Email</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="email"
-                      placeholder="Enter the Employee email"
-                      name="email"
-                      onChange={handleChange}
-                    />
+            <div className="flex justify-center gap-5 mt-5">
+              <button
+                onClick={submitEmployee}
+                className="h-10 w-32 bg-red-600 text-white rounded-3xl border-2"
+              >
+                {editIndex != null ? "Update" : "Submit"}
+              </button>
 
-                    <label className="font-bold mb-5">Phone no.</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="tel"
-                      placeholder="Enter the phone no."
-                      name="phone"
-                      onChange={handleChange}
-                    />
-                    <label className="font-bold mb-5">Emp Address</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="text"
-                      placeholder="Enter the Employee address"
-                      name="address"
-                      onChange={handleChange}
-                    />
-
-                    <label className="font-bold mb-5">Date of birth</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="date"
-                      placeholder="Enter the date of birth"
-                      name="dob"
-                      onChange={handleChange}
-                    />
-
-                    <label className="font-bold mb-5">Joining Date</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="date"
-                      placeholder="Enter the Employee joining date"
-                      name="joiningDate"
-                      onChange={handleChange}
-                    />
-                    <label className="font-bold mb-5">Emp Department</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="text"
-                      placeholder="Enter the Employee emp department"
-                      name="department"
-                      onChange={handleChange}
-                    />
-
-                    <label className="font-bold mb-5">Designation</label>
-                    <input
-                      className="w-full h-8 border-2 border-black rounded"
-                      type="text"
-                      placeholder="Enter the Employee email"
-                      name="designation"
-                      onChange={handleChange}
-                    />
-                    <div>
-                      <button
-                        className="text-white bg-red-500 rounded-3xl p-3 m-3"
-                        onClick={() => {
-                          setOpenEditModal(false);
-                        }}
-                      >
-                        edit
-                      </button>
-                      <button
-                        className="text-white bg-blue-600 rounded-3xl p-3"
-                        onClick={handleSubmit}
-                      >
-                        submit
-                      </button>
-                    </div>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <CardFooter>
-            <p>Card Footer</p>
-          </CardFooter>
-        </Card>
+              <button
+                onClick={() => setOpenModal(false)}
+                className="h-10 w-32 bg-blue-800 text-white rounded-3xl border-2"
+              >
+                Close
+              </button>
+            </div>
+          </DialogHeader>
+        </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
