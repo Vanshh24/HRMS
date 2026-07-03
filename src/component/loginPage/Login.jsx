@@ -2,7 +2,9 @@ import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-function Login() {
+let baseUrl = import.meta.env.VITE_BASE_URL;
+
+export default function Login() {
   let [loginData, setLoginData] = useState({});
   let [error, setError] = useState({});
   let handleChange = (e) => {
@@ -10,8 +12,10 @@ function Login() {
     setLoginData({ ...loginData, [name]: value });
   };
   let navigate = useNavigate();
-  let formError = {};
+
   let handleValidate = (loginData) => {
+    let formError = {};
+
     if (!loginData.email) {
       formError.email = "Email is required.";
     } else if (!loginData.password) {
@@ -20,7 +24,7 @@ function Login() {
       formError.confirmPassword = "Confirm password is required.";
     } else {
       axios
-        .post("http://localhost:5000/api/login", loginData)
+        .post(`${baseUrl}/login`, loginData)
         .then((response) => {
           let { success, message, token } = response.data;
           if (success) {
@@ -97,5 +101,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;

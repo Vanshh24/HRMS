@@ -1,6 +1,25 @@
-import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+let baseEmpUrl = import.meta.env.VITE_BASE_EMP_URL;
 
 export default function Dashboard() {
+  let [empFormData, setEmpFormData] = useState([]);
+  let [employeeCount, setEmployeeCount] = useState(0);
+  let [recentHires, setRecentHires] = useState([]);
+  useEffect(() => {
+    Promise.all([
+      axios.get(`${baseEmpUrl}/get/employees`),
+      axios.get(`${baseEmpUrl}/get/recent-hires`),
+    ])
+      .then(([res, recentHiresRes]) => {
+        setEmpFormData(res.data.data);
+        setEmployeeCount(res.data.count);
+        setRecentHires(recentHiresRes.data.data);
+      })
+      .catch((err) => {
+        console.log(err.response.data);
+      });
+  }, []);
   return (
     <>
       <main className="space-y-6">
@@ -23,7 +42,7 @@ export default function Dashboard() {
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { title: "Total Employees", value: "248" },
+            { title: "Total Employees", value: employeeCount },
             { title: "Pending Leave", value: "12" },
             { title: "Attendance Today", value: "220" },
             { title: "Payroll Due", value: "3" },
@@ -48,15 +67,11 @@ export default function Dashboard() {
               Recent Hires
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
-              <li className="rounded-2xl bg-slate-50 px-4 py-3">
-                Riya Singh - HR Executive
-              </li>
-              <li className="rounded-2xl bg-slate-50 px-4 py-3">
-                Akash Patel - Software Engineer
-              </li>
-              <li className="rounded-2xl bg-slate-50 px-4 py-3">
-                Neha Sharma - Finance Analyst
-              </li>
+              {recentHires.map((emp, index) => (
+                <li key={index} className="rounded-2xl bg-slate-50 px-4 py-3">
+                  {emp.employeeName}
+                </li>
+              ))}
             </ul>
           </div>
           <div className="rounded-3xl bg-white p-6 shadow-sm">

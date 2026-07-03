@@ -1,4 +1,4 @@
-export default function Attenadnce() {
+export default function Attendance() {
   return (
     <main className="space-y-6">
       <section className="rounded-3xl bg-white p-6 shadow-sm">

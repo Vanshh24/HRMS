@@ -28,7 +28,12 @@ export default function Panel() {
               >
                 Employees
               </button>
-              <button className="rounded-full px-4 py-2 hover:bg-slate-100">
+              <button
+                className="rounded-full px-4 py-2 hover:bg-slate-100"
+                onClick={() => {
+                  navigate("/admin/attendance");
+                }}
+              >
                 Attendance
               </button>
               <button className="rounded-full px-4 py-2 hover:bg-slate-100">
@@ -63,7 +68,7 @@ export default function Panel() {
               {[
                 { label: "Dashboard", path: "/admin/dashboard" },
                 { label: "Employee Directory", path: "/admin/employees" },
-                { label: "Attendence", path: "/admin/attendence" },
+                { label: "Attendence", path: "/admin/attendance" },
                 { label: "Leave Requests", path: "/admin/leave/request" },
                 { label: "Payroll", path: "/admin/payroll" },
                 { label: "Performance", path: "/admin/performance" },
