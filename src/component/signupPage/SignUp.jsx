@@ -13,6 +13,30 @@ export default function SignUp() {
     let { name, value } = e.target;
     setSignupData({ ...signupData, [name]: value });
   };
+  let handleSubmit = async () => {
+    try {
+      await axios
+        .post(`${baseUrl}/signup`, signupData)
+        .then((res) => {
+          let { success, message, token } = res.data;
+          if (success) {
+            alert(message);
+            localStorage.setItem("auth_token", token);
+            navigate("/admin");
+          }
+        })
+        .catch((err) => {
+          let { success, message } = err.response.data;
+
+          if (success === false) {
+            alert(message);
+          }
+          console.log(err.response.data);
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  };
   let handleValidate = (signupData) => {
     let formError = {};
 
@@ -25,32 +49,13 @@ export default function SignUp() {
     } else if (!signupData.confirmPassword) {
       formError.confirmPassword = "Confirm password is required.";
     } else {
-      console.log("Api data", signupData);
-      navigate("/admin");
-      axios
-        .post(`${baseUrl}/signup`, signupData)
-        .then((res) => {
-          let { success, message, token } = res.data;
-          if (success) {
-            alert(message);
-            localStorage.setItem("auth_token", token);
-            navigate("/admin");
-          }
-        })
-        .catch((err) => {
-          let { success, message } = err.response;
-
-          if (success === false) {
-            alert(message);
-          }
-          console.log(err.response.data);
-        });
+      if (signupData.password !== signupData.confirmPassword) {
+        formError.confirmPassword = "Passwords do not match.";
+      } else {
+        handleSubmit();
+      }
     }
     setError(formError);
-  };
-  let handleClick = () => {
-    handleValidate(signupData);
-    console.log(signupData);
   };
 
   return (
@@ -108,12 +113,12 @@ export default function SignUp() {
               <button
                 type="button"
                 className="w-full bg-blue-500 text-white h-8 rounded-md"
-                onClick={handleClick}
+                onClick={() => handleValidate(signupData)}
               >
                 Sign Up
               </button>
             </div>
-            <Link to="/login">Already have an account?</Link>
+            <Link to="/">Already have an account?</Link>
           </div>
         </div>
       </div>

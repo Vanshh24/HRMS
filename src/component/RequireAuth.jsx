@@ -4,11 +4,8 @@ export default function RequireAuth({ children }) {
   let token = localStorage.getItem("auth_token");
 
   if (!token) {
-    return (
-      <>
-        <Navigate to="/" />
-      </>
-    );
+    return <Navigate to="/" />;
   }
+
   return children;
 }

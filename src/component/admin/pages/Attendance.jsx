@@ -17,7 +17,6 @@ export default function Attendance() {
           </div>
         </div>
       </section>
-
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-3xl bg-white p-6 shadow-sm">
           <h4 className="text-sm font-medium text-slate-500">
@@ -38,7 +37,6 @@ export default function Attendance() {
           <p className="mt-4 text-3xl font-semibold text-slate-900">10</p>
         </div>
       </section>
-
       <section className="rounded-3xl bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -49,7 +47,6 @@ export default function Attendance() {
               Search and filter attendance by status and employee details.
             </p>
           </div>
-
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="text"
@@ -64,7 +61,6 @@ export default function Attendance() {
             </select>
           </div>
         </div>
-
         <div className="mt-6 overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-slate-50 text-slate-600">

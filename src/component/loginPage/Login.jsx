@@ -13,7 +13,18 @@ export default function Login() {
   };
   let navigate = useNavigate();
 
-  let handleValidate = (loginData) => {
+  let handleLogin = async (loginData) => {
+    try {
+      let { data } = await axios.post(`${baseUrl}/login`, loginData);
+
+      alert(data.message);
+      localStorage.setItem("auth_token", data.token);
+      navigate("/admin");
+    } catch (err) {
+      alert(err.response.data.message);
+    }
+  };
+  let handleValidate = async (loginData) => {
     let formError = {};
 
     if (!loginData.email) {
@@ -22,32 +33,12 @@ export default function Login() {
       formError.password = "Password is required";
     } else if (!loginData.confirmPassword) {
       formError.confirmPassword = "Confirm password is required.";
-    } else {
-      axios
-        .post(`${baseUrl}/login`, loginData)
-        .then((response) => {
-          let { success, message, token } = response.data;
-          if (success) {
-            alert(message);
-            localStorage.setItem("auth_token: ", token);
-            navigate("/admin");
-          }
-        })
-        .catch((err) => {
-          let { success, message } = err.response.data;
-          if (!success) {
-            alert(message);
-          }
-        });
     }
     setError(formError);
-  };
-  let handleClick = () => {
-    handleValidate(loginData);
-    console.log(loginData);
+
+    await handleLogin(loginData);
   };
 
-  console.log(error.email);
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="..."></div>
@@ -88,7 +79,7 @@ export default function Login() {
             <div>
               <button
                 className="w-full bg-blue-500 text-white h-8 rounded-md"
-                onClick={handleClick}
+                onClick={() => handleValidate(loginData)}
               >
                 Login
               </button>
