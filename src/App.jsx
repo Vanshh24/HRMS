@@ -6,6 +6,8 @@ import SignUp from "./component/signupPage/SignUp";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RequireAuth from "./component/RequireAuth";
 import Attendance from "./component/admin/pages/Attendance";
+import MyProfile from "./component/MyProfile";
+import Setting from "./component/Setting";
 
 export default function App() {
   return (
@@ -20,12 +22,13 @@ export default function App() {
               <Panel />
             </RequireAuth>
           }
-        />
-        <Route path="/admin" element={<Panel />}>
+        >
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="employees" element={<Employees />} />
           <Route path="attendance" element={<Attendance />} />
+          <Route path="profile" element={<MyProfile />} />
+          <Route path="setting" element={<Setting />} />
         </Route>
       </Routes>
     </BrowserRouter>

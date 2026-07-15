@@ -56,7 +56,8 @@ export default function Panel() {
               { label: "Leave Request", path: "/admin/leave/request" },
               { label: "Performance", path: "/admin/performance" },
               { label: "Report", path: "/admin/report" },
-              { label: "Settings", path: "/admin/settings" },
+              { label: "Settings", path: "/admin/setting" },
+              { label: "My Profile", path: "/admin/profile" },
             ].map(({ label, path }) => (
               <li key={path}>
                 <NavLink
